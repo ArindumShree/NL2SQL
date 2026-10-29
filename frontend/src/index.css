@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: #0b0f1a;
+    color: #f1f5f9;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
+  /* Scrollbar — thin, navy-toned */
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: #111827; }
+  ::-webkit-scrollbar-thumb  { background: #233049; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+}
+
+/* ── Light theme overrides ─────────────────────────────────────────────── */
+html.light-theme,
+html.light-theme body,
+html.light-theme #root {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.light-theme {
+  /* surface tokens */
+  --color-surface:   #f8fafc;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f1f5f9;
+  --color-surface-3: #e2e8f0;
+  --color-surface-4: #cbd5e1;
+  /* ink tokens */
+  --color-ink:       #0f172a;
+  --color-ink-muted: #475569;
+  --color-ink-subtle:#94a3b8;
+  /* accent */
+  --color-brand:      #2563eb;
+  --color-brand-glow: #1d4ed8;
+}
+
+/* Override Tailwind colors for light mode via CSS custom properties cascade */
+html.light-theme .bg-surface-1   { background-color: #ffffff !important; }
+html.light-theme .bg-surface-2   { background-color: #f1f5f9 !important; }
+html.light-theme .bg-surface-3   { background-color: #e2e8f0 !important; }
+html.light-theme .border-surface-3 { border-color: #e2e8f0 !important; }
+html.light-theme .text-ink       { color: #0f172a !important; }
+html.light-theme .text-ink-muted { color: #475569 !important; }
+html.light-theme .text-ink-subtle{ color: #94a3b8 !important; }
+html.light-theme .bg-\[#0d1117\] { background-color: #1e293b !important; }
+html.light-theme .bubble-user    { background-color: #2563eb; color: white; }
+html.light-theme .glass-card     { background-color: #ffffff; border-color: #e2e8f0; }
+
+/* ── Slide-in-right animation (for SchemaPanel) ──────────────────────── */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Fade-in animation ──────────────────────────────────────────────── */
+@keyframes fadeInAnim {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeInAnim 0.3s ease-out;
+}
+
+@layer components {
+  /* ---- Cards & surfaces ---- */
+  .glass-card {
+    @apply bg-surface-2 border border-surface-3 rounded-xl;
+  }
+
+  /* ---- Buttons ---- */
+  .btn-primary {
+    @apply bg-brand hover:bg-brand-light text-white font-semibold
+           px-5 py-2.5 rounded-lg transition-all duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50;
+  }
+  .btn-ghost {
+    @apply text-ink-muted hover:text-ink hover:bg-surface-3
+           px-3 py-1.5 rounded-lg transition-all duration-200 text-sm
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30;
+  }
+  .badge {
+    @apply text-xs font-mono px-2 py-0.5 rounded-full;
+  }
+
+  /* ---- Chat bubbles ---- */
+  .bubble-user {
+    @apply bg-brand text-white rounded-2xl rounded-br-sm
+           px-4 py-3 text-sm leading-relaxed max-w-[75%] ml-auto
+           animate-bubble-in;
+  }
+  .bubble-assistant {
+    @apply bg-surface-2 border border-surface-3 text-ink
+           rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed
+           max-w-[85%] animate-bubble-in;
+  }
+
+  /* ---- Follow-up chips ---- */
+  .chip {
+    @apply bg-surface-2 border border-brand/30 hover:border-brand
+           hover:bg-brand/10 text-ink-muted hover:text-ink
+           text-xs px-3 py-1.5 rounded-full cursor-pointer
+           transition-all duration-150 text-left
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40;
+  }
+
+  /* ---- Typing indicator dots ---- */
+  .dot { @apply w-1.5 h-1.5 rounded-full bg-ink-subtle inline-block animate-typing; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+}
+
+/* ────────────────────────────────────────────── */
+/* Mobile responsiveness & iOS fixes */
+/* ────────────────────────────────────────────── */
+
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
+/* prevent horizontal page overflow */
+body {
+  overflow-x: hidden;
+}
+
+/* iPhone safe area support */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* mobile-specific layout improvements */
+@media (max-width: 767px) {
+
+  .bubble-user,
+  .bubble-assistant {
+    max-width: 100%;
+  }
+
+  table {
+    min-width: 640px;
+  }
+
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  code {
+    word-break: break-word;
+  }
+
+  .glass-card {
+    border-radius: 0.875rem;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* prevents iOS zoom */
+  }
+}

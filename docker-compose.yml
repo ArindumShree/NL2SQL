@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────
+  # PostgreSQL + Northwind seed data
+  # ─────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: nl2sql_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-northwind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-northwind}
+      POSTGRES_DB: ${POSTGRES_DB:-northwind}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/northwind.sql:/docker-entrypoint-initdb.d/northwind.sql:ro
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-northwind} -d ${POSTGRES_DB:-northwind}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - nl2sql_net
+
+  # ─────────────────────────────────────────
+  # Backend API (FastAPI + Gemini + MCP client)
+  # The backend spawns the MCP server as a stdio subprocess internally.
+  # ─────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: nl2sql_backend
+    restart: unless-stopped
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-northwind}:${POSTGRES_PASSWORD:-northwind}@postgres:5432/${POSTGRES_DB:-northwind}
+      MCP_SERVER_CMD: python
+      MCP_SERVER_SCRIPT: /mcp_server/server.py
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - nl2sql_net
+
+  # ─────────────────────────────────────────
+  # Frontend (React + Tailwind, served via nginx)
+  # ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    container_name: nl2sql_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - nl2sql_net
+
+volumes:
+  postgres_data:
+
+networks:
+  nl2sql_net:
+    driver: bridge

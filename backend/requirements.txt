@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+google-genai
+mcp
+httpx
+pydantic
+python-dotenv
+asyncpg
+sqlparse
+psycopg2-binary

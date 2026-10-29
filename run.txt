@@ -1,0 +1,57 @@
+NL2SQL - HOW TO RUN
+===================
+
+PREREQUISITES
+-------------
+- Docker Desktop must be running
+- You must be in the project folder: C:\Users\tarun\OneDrive\Desktop\NL2SQL
+
+
+START THE PROJECT
+-----------------
+docker compose up -d
+
+or
+
+docker compose down 
+docker compose up --build
+
+Then open: http://localhost:3000
+
+
+STOP THE PROJECT
+----------------
+docker compose down
+
+
+REBUILD AFTER CODE CHANGES
+---------------------------
+docker compose build --no-cache backend
+docker compose build --no-cache frontend
+docker compose up -d
+
+
+VIEW LOGS
+---------
+docker compose logs backend --tail=50
+docker compose logs frontend --tail=50
+
+
+CURRENT MODEL
+-------------
+gemini-2.5-flash  (set in backend/main.py)
+Free tier: ~15 RPM, 500 RPD — if you hit 429 errors, wait ~24hrs or enable billing
+
+
+PORTS
+-----
+Frontend  → http://localhost:3000
+Backend   → http://localhost:8000
+Postgres  → localhost:5433
+
+
+NOTES
+-----
+- Do NOT use gemini-2.0-flash or gemini-1.5-flash — both are quota-exhausted on your free key
+- If you see "Internal error: unhandled errors in a TaskGroup" → it's almost always a 429 quota error
+  Check with: docker compose logs backend --tail=20
